@@ -36,6 +36,24 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# Route Tables
+
+resource "aws_route_table" "external" {
+  vpc_id = "${aws_vpc.main.id}"
+
+  tags {
+    Name        = "${var.name}-external-001"
+    Environment = "${var.environment}"
+    terraform   = "true"
+  }
+}
+
+resource "aws_route" "external" {
+  route_table_id         = "${aws_route_table.external.id}"
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = "${aws_internet_gateway.main.id}"
+}
+
 # OUTPUTS
 
 output "vpc_id" {
@@ -52,4 +70,8 @@ output "vpc_security_group" {
 
 output "vpc_igw_id" {
   value = "${aws_internet_gateway.main.id}"
+}
+
+output "external_route_table_id" {
+  value = "${aws_route_table.external.id}"
 }
