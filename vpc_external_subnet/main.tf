@@ -1,4 +1,4 @@
-ariable "name" {
+variable "name" {
   description = "Name to give the route table"
 }
 
