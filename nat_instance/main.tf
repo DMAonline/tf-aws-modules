@@ -29,6 +29,10 @@ variable "nat_instance_ssh_key_name" {
   default     = ""
 }
 
+variable "vpc_id" {
+  description = "ID of the VPC in which to create the security group"
+}
+
 # This data source returns the newest Amazon NAT instance AMI
 data "aws_ami" "nat_ami" {
   most_recent = true
@@ -69,11 +73,11 @@ resource "aws_security_group" "nat_instance" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = "${var.vpc_id}"
 }
 
 resource "aws_instance" "nat_instance" {
-  availability_zone = "${var.availability_zones}"
+  availability_zone = "${var.availability_zone}"
 
   depends_on = [
     "aws_security_group.nat_instances",
@@ -98,7 +102,7 @@ resource "aws_instance" "nat_instance" {
 
   subnet_id = "${var.external_subnet_id}"
 
-  vpc_security_group_ids = ["${aws_security_group.nat_instances.id}"]
+  vpc_security_group_ids = ["${aws_security_group.nat_instance.id}"]
 
   lifecycle {
     ignore_changes = ["ami"]
