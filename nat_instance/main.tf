@@ -80,7 +80,7 @@ resource "aws_instance" "nat_instance" {
   availability_zone = "${var.availability_zone}"
 
   depends_on = [
-    "aws_security_group.nat_instances",
+    "aws_security_group.nat_instance",
   ]
 
   tags {
