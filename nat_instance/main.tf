@@ -3,19 +3,12 @@ variable "internal_cidrs" {
   type        = "list"
 }
 
-variable "external_subnet_ids" {
-  description = "List of IDs of the external subnets to provision in"
-  type        = "list"
+variable "external_subnet_id" {
+  description = "ID of the external subnet to provision in"
 }
 
-variable "nat_instance_count" {
-  description = "Number of NAT instances to provison, must not exceed the number of availability zones and external subnet ids specified"
-  default     = 1
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = "list"
+variable "availability_zone" {
+  description = "Availability zone to provision in"
 }
 
 variable "name" {
@@ -51,7 +44,7 @@ data "aws_ami" "nat_ami" {
   }
 }
 
-resource "aws_security_group" "nat_instances" {
+resource "aws_security_group" "nat_instance" {
   name        = "nat"
   description = "Allow traffic from clients into NAT instances"
 
@@ -80,21 +73,20 @@ resource "aws_security_group" "nat_instances" {
 }
 
 resource "aws_instance" "nat_instance" {
-  count             = "${var.nat_instance_count}"
-  availability_zone = "${element(var.availability_zones, count.index)}"
+  availability_zone = "${var.availability_zones}"
 
   depends_on = [
     "aws_security_group.nat_instances",
   ]
 
   tags {
-    Name        = "${var.name}-${format("internal-%03d-NAT", count.index+1)}"
+    Name        = "${var.name}"
     Environment = "${var.environment}"
     terraform   = "true"
   }
 
   volume_tags {
-    Name        = "${var.name}-${format("internal-%03d-NAT", count.index+1)}"
+    Name        = "${var.name}"
     Environment = "${var.environment}"
     terraform   = "true"
   }
@@ -104,11 +96,19 @@ resource "aws_instance" "nat_instance" {
   instance_type     = "${var.nat_instance_type}"
   source_dest_check = false
 
-  subnet_id = "${element(var.external_subnet_ids, count.index)}"
+  subnet_id = "${var.external_subnet_id}"
 
   vpc_security_group_ids = ["${aws_security_group.nat_instances.id}"]
 
   lifecycle {
     ignore_changes = ["ami"]
   }
+}
+
+output "security_group_id" {
+  value = "${aws_security_group.nat_instance.id}"
+}
+
+output "instance_id" {
+  value = "${aws_instance.nat_instance.id}"
 }
