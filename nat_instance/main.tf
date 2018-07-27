@@ -49,7 +49,7 @@ data "aws_ami" "nat_ami" {
 }
 
 resource "aws_security_group" "nat_instance" {
-  name        = "nat"
+  name        = "nat-${var.name}"
   description = "Allow traffic from clients into NAT instances"
 
   ingress {
