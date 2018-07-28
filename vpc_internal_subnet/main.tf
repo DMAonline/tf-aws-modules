@@ -22,16 +22,17 @@ variable "route_table_id" {
   description = "The ID route table to associate the subnet table with"
 }
 
+variable "subnet_tags" {
+  default = {}
+  type    = "map"
+}
+
 resource "aws_subnet" "internal" {
   vpc_id            = "${var.vpc_id}"
   cidr_block        = "${var.subnet_cidr}"
   availability_zone = "${var.subnet_az}"
 
-  tags {
-    Name        = "${var.name}"
-    Environment = "${var.environment}"
-    terraform   = "true"
-  }
+  tags = "${merge(map("Name", format("%s", var.name), "Environment", format("%s", var.environment), "terraform", "true"), var.subnet_tags)}"
 }
 
 resource "aws_route_table_association" "internal" {

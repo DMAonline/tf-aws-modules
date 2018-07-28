@@ -22,6 +22,11 @@ variable "map_public_ip_on_launch" {
   default = true
 }
 
+variable "subnet_tags" {
+  default = {}
+  type    = "map"
+}
+
 variable "route_table_id" {
   description = "The ID route table to associate the subnet table with"
 }
@@ -32,11 +37,7 @@ resource "aws_subnet" "external" {
   availability_zone       = "${var.subnet_az}"
   map_public_ip_on_launch = "${var.map_public_ip_on_launch}"
 
-  tags {
-    Name        = "${var.name}"
-    Environment = "${var.environment}"
-    terraform   = "true"
-  }
+  tags = "${merge(map("Name", format("%s", var.name), "Environment", format("%s", var.environment), "terraform", "true"), var.subnet_tags)}"
 }
 
 resource "aws_route_table_association" "external" {
