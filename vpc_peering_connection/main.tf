@@ -47,8 +47,8 @@ variable "destination_cidr_block" {
 
 locals {
   booleans     = "${map("true", true, "false", false)}"
-  is_requester = "${var.peer_mode == "requester" ? true : false}"
-  is_accepter  = "${var.peer_mode == "accepter" ? true : false}"
+  is_requester = "${var.peer_mode == "requester" ? 1 : 0}"
+  is_accepter  = "${var.peer_mode == "accepter" ? 1 : 0}"
 }
 
 resource "aws_vpc_peering_connection" "requester_peering_connection" {
