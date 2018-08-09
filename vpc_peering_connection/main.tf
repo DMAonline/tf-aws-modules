@@ -47,8 +47,8 @@ variable "destination_cidr_block" {
 
 locals {
   booleans     = "${map("true", true, "false", false)}"
-  is_requester = "${var.peer_mode == "requester" ? 1 : 0}"
-  is_accepter  = "${var.peer_mode == "accepter" ? 1 : 0}"
+  is_requester = "${lookup(local.booleans, var.peer_mode == "requester")}"
+  is_accepter  = "${lookup(local.booleans, var.peer_mode == "accepter")}"
 }
 
 resource "aws_vpc_peering_connection" "requester_peering_connection" {
@@ -84,7 +84,7 @@ resource "aws_route" "requester" {
   count                     = "${local.is_requester ? length(var.route_tables) : 0}"
   route_table_id            = "${element(var.route_tables, count.index)}"
   destination_cidr_block    = "${var.destination_cidr_block}"
-  vpc_peering_connection_id = "${aws_vpc_peering_connection.requester_peering_connection.id}"
+  vpc_peering_connection_id = "${aws_vpc_peering_connection.requester_peering_connection.*.id}"
 }
 
 resource "aws_route" "accepter" {
@@ -95,5 +95,5 @@ resource "aws_route" "accepter" {
 }
 
 output "vpc_peering_connection_id" {
-  value = "${local.is_requester ? aws_vpc_peering_connection.requester_peering_connection.id : var.vpc_peering_connection_id}"
+  value = "${coalescelist(list(var.vpc_peering_connection_id), aws_vpc_peering_connection.requester_peering_connection.*.id)}"
 }
