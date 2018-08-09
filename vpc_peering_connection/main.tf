@@ -6,6 +6,10 @@ variable "environment" {
   description = "Environment tag, e.g. sandbox, dev, staging, prod"
 }
 
+variable "peer_mode" {
+  description = "Mode to manage the peer connection as, either requester or accepter"
+}
+
 variable "vpc_id" {
   description = "The ID of the VPC requesting the peering connection"
   default     = ""
